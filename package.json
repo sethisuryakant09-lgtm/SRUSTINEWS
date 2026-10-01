@@ -1,18 +1,27 @@
 {
-  "name": "digital-chronicle-monorepo",
+  "name": "srusti-news-monorepo",
   "version": "1.0.0",
-  "description": "The Digital Chronicle - Modern Newspaper Web Platform",
+  "description": "SRUSTI NEWS - Modern Newspaper Web Platform",
   "private": true,
   "scripts": {
-    "start": "npm.cmd --prefix server start",
-    "server": "npm.cmd --prefix server start",
-    "client": "npm.cmd --prefix client dev",
-    "dev": "npm.cmd --prefix server start",
-    "build": "npm.cmd --prefix client run build",
-    "crawl": "node server/test-crawler.js",
-    "seed": "npm.cmd --prefix server run seed"
+    "start": "node server/src/index.js",
+    "build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate --schema=./prisma/schema.prisma",
+    "vercel-build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate --schema=./prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "@prisma/adapter-neon": "^5.22.0",
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-cron": "^3.0.3",
+    "rss-parser": "^3.13.0",
+    "slugify": "^1.6.6",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "prisma": "^5.22.0"
   }
 }

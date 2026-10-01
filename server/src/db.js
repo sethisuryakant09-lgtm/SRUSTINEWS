@@ -1,20 +1,22 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
-const dns = require('dns');
 
-// Configure reliable DNS resolvers (Cloudflare, Google)
-try {
-  dns.setServers(['1.1.1.1', '8.8.8.8', '1.0.0.1', '8.8.4.4']);
-} catch (e) {
-  console.warn('DNS server configuration warning:', e.message);
-}
-
-const { Pool, neonConfig } = require('@neondatabase/serverless');
+const { neonConfig, Pool } = require('@neondatabase/serverless');
 const { PrismaNeon } = require('@prisma/adapter-neon');
 const { PrismaClient } = require('@prisma/client');
-const ws = require('ws');
 
-// Use WebSocket for Neon serverless — connects via HTTPS/WSS (port 443)
-neonConfig.webSocketConstructor = ws;
+// Use WebSocket only in non-serverless environments (local dev)
+// On Vercel serverless, Neon uses HTTP fetch-based pooling automatically
+if (typeof WebSocket === 'undefined' && process.env.VERCEL !== '1') {
+  try {
+    const ws = require('ws');
+    neonConfig.webSocketConstructor = ws;
+  } catch (e) {
+    // ws not available — Neon will use fetch transport
+  }
+}
+
+// Enable connection caching for serverless environments (Vercel)
+neonConfig.fetchConnectionCache = true;
 
 const connectionString = process.env.DATABASE_URL;
 

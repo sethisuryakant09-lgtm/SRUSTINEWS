@@ -12,20 +12,25 @@ function getHash(text) {
 // POST /api/v1/admin/login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  // Default credentials: admin@chronicle.com / admin123
-  if ((email === 'admin@chronicle.com' && password === 'admin123') || (email && password === 'admin123') || (email && password === 'admin')) {
+  // Default credentials: admin@srustinews.com or admin@chronicle.com / admin123
+  if (
+    (email === 'admin@srustinews.com' && password === 'admin123') ||
+    (email === 'admin@chronicle.com' && password === 'admin123') ||
+    (email && password === 'admin123') ||
+    (email && password === 'admin')
+  ) {
     return res.json({
       success: true,
       token: 'jwt_mock_token_' + Date.now(),
       user: {
         id: 'admin-01',
         name: 'Chief Editorial Director',
-        email: email || 'admin@chronicle.com',
+        email: email || 'admin@srustinews.com',
         role: 'SUPER_ADMIN'
       }
     });
   }
-  return res.status(401).json({ error: 'Invalid credentials. Hint: use admin@chronicle.com and admin123' });
+  return res.status(401).json({ error: 'Invalid credentials. Hint: use admin@srustinews.com and admin123' });
 });
 
 // GET /api/v1/admin/stats
@@ -81,9 +86,9 @@ router.get('/articles', async (req, res) => {
     }
     if (search) {
       where.OR = [
-        { title: { contains: search } },
-        { summary: { contains: search } },
-        { author: { contains: search } }
+        { title: { contains: search, mode: 'insensitive' } },
+        { summary: { contains: search, mode: 'insensitive' } },
+        { author: { contains: search, mode: 'insensitive' } }
       ];
     }
 
