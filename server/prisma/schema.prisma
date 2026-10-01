@@ -1,0 +1,69 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+model Article {
+  id           String    @id @default(uuid())
+  title        String
+  slug         String    @unique
+  summary      String
+  content      String?
+  sourceUrl    String
+  imageUrl     String?
+  author       String?   @default("Editorial Desk")
+  publishedAt  DateTime  @default(now())
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  sourceId     String?
+  source       Source?   @relation(fields: [sourceId], references: [id])
+  isBreaking   Boolean   @default(false)
+  isFeatured   Boolean   @default(false)
+  viewCount    Int       @default(0)
+  readTime     Int       @default(3)
+  contentHash  String    @unique
+  status       String    @default("PUBLISHED")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([publishedAt(sort: Desc)])
+  @@index([status, categoryId])
+  @@index([contentHash])
+  @@index([slug])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  color       String    @default("#2563EB")
+  articles    Article[]
+}
+
+model Source {
+  id               String    @id @default(uuid())
+  name             String
+  url              String
+  feedUrl          String
+  credibilityScore Int       @default(85)
+  isActive         Boolean   @default(true)
+  categoryName     String    @default("World")
+  articles         Article[]
+  createdAt        DateTime  @default(now())
+}
+
+model CrawlerLog {
+  id                String   @id @default(uuid())
+  status            String   @default("SUCCESS")
+  articlesFound     Int      @default(0)
+  articlesAdded     Int      @default(0)
+  duplicatesSkipped Int      @default(0)
+  message           String?
+  createdAt         DateTime @default(now())
+}
