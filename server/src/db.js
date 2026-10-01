@@ -1,24 +1,32 @@
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+const path = require('path');
+
+// Load .env for local dev (Vercel injects env vars directly)
+if (process.env.VERCEL !== '1') {
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
+}
 
 const { neonConfig, Pool } = require('@neondatabase/serverless');
 const { PrismaNeon } = require('@prisma/adapter-neon');
 const { PrismaClient } = require('@prisma/client');
 
-// Use WebSocket only in non-serverless environments (local dev)
-// On Vercel serverless, Neon uses HTTP fetch-based pooling automatically
-if (typeof WebSocket === 'undefined' && process.env.VERCEL !== '1') {
+// Use ws WebSocket only in local dev — Vercel uses native fetch
+if (process.env.VERCEL !== '1') {
   try {
     const ws = require('ws');
     neonConfig.webSocketConstructor = ws;
   } catch (e) {
-    // ws not available — Neon will use fetch transport
+    // ignore
   }
 }
 
-// Enable connection caching for serverless environments (Vercel)
+// Neon serverless HTTP connection caching
 neonConfig.fetchConnectionCache = true;
 
 const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
 
 const pool = new Pool({ connectionString });
 const adapter = new PrismaNeon(pool);

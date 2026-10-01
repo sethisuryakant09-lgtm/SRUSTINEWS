@@ -1,5 +1,7 @@
-require('dotenv').config();
-const path = require('path');
+// Load .env for local dev — Vercel injects env vars automatically
+if (process.env.VERCEL !== '1') {
+  require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+}
 const express = require('express');
 const cors = require('cors');
 const articlesRouter = require('./routes/articles');
@@ -38,17 +40,7 @@ app.use('/api/v1/sources', sourcesRouter);
 app.use('/api/v1/crawler', crawlerRouter);
 app.use('/api/v1/admin', adminRouter);
 
-// Serve frontend static assets (React Vite build)
-const clientDistPath = path.join(__dirname, '../../client/dist');
-app.use(express.static(clientDistPath));
 
-app.get('*', (req, res, next) => {
-  if (req.url.startsWith('/api')) return next();
-  const indexPath = path.join(clientDistPath, 'index.html');
-  res.sendFile(indexPath, (err) => {
-    if (err) next();
-  });
-});
 
 // Error Handler
 app.use((err, req, res, next) => {

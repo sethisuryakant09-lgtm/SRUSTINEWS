@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node server/src/index.js",
-    "build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate --schema=./prisma/schema.prisma",
-    "vercel-build": "cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate --schema=./prisma/schema.prisma"
+    "vercel-build": "npm install --prefix client && npm run build --prefix client && npx prisma generate --schema=server/prisma/schema.prisma"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
